@@ -13,12 +13,12 @@ Don't hesitate to [contact me](mailto:le.xu@bytedance.com) if you're interested 
 
 Education
 ======
-* Ph.D. in Computer Science, University of Illinois at Urbana Champaign, 12/2021
+* **[12/2021]** Ph.D. in Computer Science, University of Illinois at Urbana Champaign 
   * Advised by Indranil Gupta.
   * Thesis: [Elastic techniques to handle dynamism in real-time data processing systems](https://www.ideals.illinois.edu/items/123174/bitstreams/405779/data.pdf)
-* M.S. in Computer Science, University of Illinois at Urbana Champaign, 05/2015
+* **[05/2015]** M.S. in Computer Science, University of Illinois at Urbana Champaign 
   * Advised by Indranil Gupta.
-* B.S. in Math and Computer Science, University of Illinois at Urbana Champaign, 05/2013
+* **[05/2013]** B.S. in Math and Computer Science, University of Illinois at Urbana Champaign
 
 Publications and Preprints
 ======
