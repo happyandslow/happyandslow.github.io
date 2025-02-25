@@ -24,8 +24,8 @@ author:
   avatar           : "lexu.jpg"
   name             : "Le Xu"
   pronouns         : # example: "she/her"  
-  bio              : "I love all things systems."
-  location         : "The Universe."
+  bio              : "行为艺术家。" #"I love all things systems."
+  location         : "Bellevue, WA."
   employer         : "ByteDance"
   uri              : "https://lexu.space" # URL
   email            : "le.xu@bytedance.com" 
@@ -43,7 +43,7 @@ author:
   # bitbucket        : # Username - Update with your username on the site
   # codepen          : # Username
   # dribbble         : # Username
-  # github           : "academicpages"
+  github           : "happyandslow"
   # kaggle           : # Username  
   # stackoverflow    : # User number or user number and name (i.e., use "1" or "1/jeff-atwood")    
 
