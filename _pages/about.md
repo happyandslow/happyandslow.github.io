@@ -12,7 +12,7 @@ Don't hesitate to [contact me](mailto:le.xu@bytedance.com) if you're interested 
 
 Latest
 ======
-* **[3/2025]** We open-sourced [AIBrix](https://github.com/vllm-project/aibrix)! AIBrix is a production-ready cloud-native stack that provides essential building blocks to enable scalable LLM inference. AIBrix enables deploying, managing, and scaling LLM inference with one click, while also providing extensible APIs advancing research in GenAI cloud infrastructure. 
+* **[3/2025]** We open-sourced [AIBrix](https://github.com/vllm-project/aibrix)! AIBrix is a production-ready cloud-native stack that provides essential building blocks to enable scalable LLM inference. It enables deploying, managing, and scaling LLM inference with one click, while also providing extensible APIs advancing research in GenAI cloud infrastructure. 
 
 Education
 ======
