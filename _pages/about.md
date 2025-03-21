@@ -26,7 +26,7 @@ Publications and Preprints
   * A block-based LLM serving framework for fine-grained resource provisioning.
 * **[Preprints]** Le Xu, Divyanshu Saxena, Neeraja J. Yadwadkar, Aditya Akella and Indranil Gupta. “*<u>Dirigo: Self-scaling Stateful Actors For Serverless Real-time Data Processing.</u>*” [[arxiv]](https://arxiv.org/abs/2308.03615)
   * A virtual actor model that helps stream processing applications to scale freely at fine granularity.
-* **[GPGPU 25]**  “*<u>Exploring the Wafer-Scale GPU</u>*” [[link]](files/wafer_scale_gpu_gpgpu.pdf)
+* **[GPGPU 25]** Daoxuan Xu, Le Xu, Jie Ren, Yifan Sun. “*<u>Exploring the Wafer-Scale GPU</u>*” [[link]](files/wafer_scale_gpu_gpgpu.pdf)
   * Explore design tradeoffs of different wafer-scale architectures.
 * **[EMNLP 24]** Bodun Hu, Le Xu, Jeongyoon Moon, Neeraja J. Yadwadkar, Aditya Akella. “*<u>MOSEL: Inference Serving Using Dynamic Modality Selection.</u>*” [[link]](https://aclanthology.org/2024.emnlp-main.501.pdf)
   * A modality-selection framework for real-time ML inference for multi-modality data.  
