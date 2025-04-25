@@ -47,8 +47,7 @@ Each individual view is maintained as a plain list (without a graph-based index)
 
 ### Maintaining incremental states for LLM memory
 #### Textual Memory
-##### Structured/Semi-structured Memory with semantic operators
-An example of imposing semantics on top of an LLM operator is [Lotus](). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
+**Structured/Semi-structured Memory with semantic operators:** An example of imposing semantics on top of an LLM operator is [Lotus](). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
 
 This could convert a long-context QA example into the following: using Lotus as an example, the query 1. retrieves top papers most relevant to my research area, 2. generates insight for each paper, and 3. creates a digest summarizing the research insights.
 <img src="/images/blogs/lotus1.png" alt="lotus1" width="800"/>
@@ -73,8 +72,7 @@ Additionally, the cost of using semantic operators could be high. Operators use 
 - Leverage attention sparsity
   - For instance, a query like `papers_df.sem_topk("the {abstract} makes the most outrageous claim", K=10)` likely attends to names, numbers, or trigger phrases. Since each entry is reused frequently in `sem_topk`, exploiting sparsity can yield efficiency without harming accuracy.
 
-##### Using UDF Operators
-Semantic-aware LLM-based operators model `DATA_SOURCE` as bags of data tuples (like relational operators). Other approaches extract structure as graphs, e.g., [GraphRAG](https://arxiv.org/pdf/2404.16130), [HippoRAG](https://arxiv.org/pdf/2502.14802).
+**Using UDF Operators**: Semantic-aware LLM-based operators model `DATA_SOURCE` as bags of data tuples (like relational operators). Other approaches extract structure as graphs, e.g., [GraphRAG](https://arxiv.org/pdf/2404.16130), [HippoRAG](https://arxiv.org/pdf/2502.14802).
 
 <img src="/images/blogs/HippoRAG.png" alt="hipporag" width="800"/>
 
@@ -110,8 +108,7 @@ Three strategies to approach this:
 3. **Recompute sub-paragraphs** (middle ground)
 
 
-**Append delta as part of conversation**:  
-For a model $LLM$, say we want to maintain a previously generated result $LLM(C)$ with initial context $C$. When the context is updated with $\Delta_{C}$, the most straightforward way to get an updated result is to call the model again with the new context and previously generated output as history:  
+**Append delta as part of conversation**: For a model $LLM$, say we want to maintain a previously generated result $LLM(C)$ with initial context $C$. When the context is updated with $\Delta_{C}$, the most straightforward way to get an updated result is to call the model again with the new context and previously generated output as history:  
 $LLM(C + LLM(C) + \Delta_{C})$
 
 As updates stream in, this forms a chronological log of deltas, naturally supporting versioning and time-travel. Some considerations:
@@ -120,8 +117,7 @@ As updates stream in, this forms a chronological log of deltas, naturally suppor
 - <ins>*Complexity of this approach*</ins>: This resembles multi-turn dialogue. While later updates may be short, accumulating full history increases context length, which impacts decoding time. Although KV sharing during prefill can reduce computation, its benefit diminishes as context grows.  
   A potential optimization is **edit history compaction**—merge old edits into the original context and prune them from the conversation. To retain KV reuse after compaction, KV entries may need to be regenerated asynchronously (i.e., off the critical path).
 
-**Replace keywords if identifiable**:  
-[Recent research](https://arxiv.org/pdf/2502.12067) shows that Chains-of-Thought can be compressed into key text tokens with little impact on accuracy. This suggests:
+**Replace keywords if identifiable**: [Recent research](https://arxiv.org/pdf/2502.12067) shows that Chains-of-Thought can be compressed into key text tokens with little impact on accuracy. This suggests:
 
 If we can identify the key information in context that is likely to change, and correlate it with the generated output, we can perform efficient updates.
 
@@ -137,8 +133,7 @@ The examples below illustrate cases where key information in the input directly 
 
 This correlation can help determine whether to skip recomputation or invalidate outputs.
 
-**Find sub-paragraphs to recompute**:  
-Building on earlier reasoning examples, attention scores might help uncover dependencies between context and output. Consider this example from the [glaiveai/RAG-v1](https://huggingface.co/datasets/glaiveai/RAG-v1) dataset:
+**Find sub-paragraphs to recompute**: Building on earlier reasoning examples, attention scores might help uncover dependencies between context and output. Consider this example from the [glaiveai/RAG-v1](https://huggingface.co/datasets/glaiveai/RAG-v1) dataset:
 
 The attention heatmap below shows alignment between generated sentences (Y-axis) and context sentences (X-axis). Blue/yellow boxes indicate where output closely follows input content. Columns with low attention were removed (green highlight), and the request was re-run.
 
@@ -163,6 +158,8 @@ When I modified birth dates of the directors (irrelevant to the question), atten
 When I changed a relevant fact—like nationality—the model’s attention shifted only in the reasoning step (yellow/pink boxes), leaving prior attention stable. This suggests fine-grained recomputation is feasible:
 
 <img src="/images/blogs/film-nationality.png" alt="legal" width="1000"/>
+
+#### Questions to ask
 
 **Tracking intra-context dependencies?**  
 If we can accurately identify dependency structures, how much can we save?
