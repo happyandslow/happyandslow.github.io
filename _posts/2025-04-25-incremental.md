@@ -43,7 +43,7 @@ It seems most vector DBs do not natively support real-time view maintenance, and
 The most relevant work I’ve found discussing something similar to view maintenance in vector DBs is [VectraFlow](https://vldb.org/cidrdb/papers/2025/p23-lu.pdf). VectraFlow maintains views incrementally for semantic-aware filter and top-K operations. The focus of the work, I think, is on reducing the number of views to check and update as new events occur (through clustering, which may involve accuracy/performance trade-offs).
 
 Each individual view is maintained as a plain list (without a graph-based index), which might result in longer search/update times if the view contains a large amount of data.
-<img src="image/vectraflow.png" alt="vectraflow" width="200"/>
+<img src="images/blogs/vectraflow.png" alt="vectraflow" width="200"/>
 
 ### Maintaining incremental states for LLM memory
 #### Textual Memory
@@ -51,7 +51,7 @@ Each individual view is maintained as a plain list (without a graph-based index)
 An example of imposing semantics on top of an LLM operator is [Lotus](). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
 
 This could convert a long-context QA example into the following: using Lotus as an example, the query 1. retrieves top papers most relevant to my research area, 2. generates insight for each paper, and 3. creates a digest summarizing the research insights.
-<img src="image/lotus1.png" alt="lotus1" width="800"/>
+<img src="images/blogs/lotus1.png" alt="lotus1" width="800"/>
 
 The semantic operators proposed are mostly similar to relational operators. Therefore, the idea of incremental view maintenance should transfer straightforwardly to this framework.
 
@@ -61,7 +61,7 @@ Say I make the following modification to my `DATA_SOURCE` (a collection of paper
    - Maintain `sem_index` by removing the entry—this overlaps with [Maintaining incremental states on vector DB](#Maintaining-incremental-states-on-vector-DB).
    - Address the challenge of removing its contribution from `sem_agg`, which is hard if the aggregation is not invertible. One optimization is to maintain partial computational results in memory, e.g., tree-based aggregation allows partial reuse.
 
-<img src="image/lotus2.png" alt="lotus2" width="800"/>
+<img src="images/blogs/lotus2.png" alt="lotus2" width="800"/>
 
 The figure above shows semantic operators in Lotus. Many of these are derived from relational operators, so modifications to `DATA_SOURCE` should map to existing literature.
 
@@ -76,7 +76,7 @@ Additionally, the cost of using semantic operators could be high. Operators use 
 ##### Using UDF Operators
 Semantic-aware LLM-based operators model `DATA_SOURCE` as bags of data tuples (like relational operators). Other approaches extract structure as graphs, e.g., [GraphRAG](https://arxiv.org/pdf/2404.16130), [HippoRAG](https://arxiv.org/pdf/2502.14802).
 
-<img src="image/HippoRAG.png" alt="hipporag" width="800"/>
+<img src="images/blogs/HippoRAG.png" alt="hipporag" width="800"/>
 
 [HippoRAG](https://arxiv.org/pdf/2502.14802) constructs a knowledge graph during an offline indexing phase to support reasoning in RAG QA. It claims to support incremental updates to the knowledge graph.
 
@@ -91,7 +91,7 @@ Assuming the LLM can retrieve/reason from both context and its trained memory, c
 
 [2WikiMultiHopQA](https://arxiv.org/pdf/2011.01060v2) provides reasoning examples with annotated key entities and relations—almost like implicit graphs. The question: when the LLM reasons internally, can it incrementally maintain this reasoning if the dependency graph is implicit?
 
-<img src="image/wiki2-anotated.png" alt="wiki2" width="800"/>
+<img src="images/blogs/wiki2-anotated.png" alt="wiki2" width="800"/>
 
 In general, we want LLMs to:
 1. Identify data source (parameterized memory, user-provided `DATA_SOURCE`, or generated context).
@@ -142,27 +142,27 @@ Building on earlier reasoning examples, attention scores might help uncover depe
 
 The attention heatmap below shows alignment between generated sentences (Y-axis) and context sentences (X-axis). Blue/yellow boxes indicate where output closely follows input content. Columns with low attention were removed (green highlight), and the request was re-run.
 
-<img src="image/glaive-3-mid-preupdate.png" alt="legal" width="800"/>
+<img src="images/blogs/glaive-3-mid-preupdate.png" alt="legal" width="800"/>
 
 Below, the updated result includes previously seen content (blue/yellow) and also retrieves new context (red box). Overall output remains similar.
 
-<img src="image/glaive-3-mid-updated.png" alt="legal" width="800"/>
+<img src="images/blogs/glaive-3-mid-updated.png" alt="legal" width="800"/>
 
 In more complex multi-hop QA, we can still trace how output depends on intermediate reasoning. Here’s an example from [2WikiMultiHopQA](https://huggingface.co/datasets/xanhho/2WikiMultihopQA) using [deepseek-ai/DeepSeek-R1-Distill-Qwen-7B](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B):
 
-<img src="image/film-original.png" alt="legal" width="1000"/>
+<img src="images/blogs/film-original.png" alt="legal" width="1000"/>
 
 Blue/red boxes highlight direct facts. The yellow box shows the final reasoning step. The model first extracts two key facts before comparison—following the "bridge entity and comparison" pattern in [2WikiMultiHopQA](https://aclanthology.org/2020.coling-main.580.pdf).
 
-<img src="image/2wiki-bridge.png" alt="2wiki" width="600"/>
+<img src="images/blogs/2wiki-bridge.png" alt="2wiki" width="600"/>
 
 When I modified birth dates of the directors (irrelevant to the question), attention patterns remained unchanged—as expected.
 
-<img src="image/film-date.png" alt="legal" width="1000"/>
+<img src="images/blogs/film-date.png" alt="legal" width="1000"/>
 
 When I changed a relevant fact—like nationality—the model’s attention shifted only in the reasoning step (yellow/pink boxes), leaving prior attention stable. This suggests fine-grained recomputation is feasible:
 
-<img src="image/film-nationality.png" alt="legal" width="1000"/>
+<img src="images/blogs/film-nationality.png" alt="legal" width="1000"/>
 
 **Tracking intra-context dependencies?**  
 If we can accurately identify dependency structures, how much can we save?
@@ -241,9 +241,9 @@ The goal remains: **reuse past computation** whenever possible.
      - A summary of milestones and execution plans (which further depends on summarization of the planning/design documents).
      - Tasks assigned during meetings (which further depends on summarization of the conversation in the meeting recordings).
 
-<!-- <img src="image/film-original.png" alt="legal" width="1000"/>
-<img src="image/film-age.png" alt="legal" width="1000"/>
-<img src="image/film-different-context.png" alt="legal" width="1000"/> -->
+<!-- <img src="images/blogs/film-original.png" alt="legal" width="1000"/>
+<img src="images/blogs/film-age.png" alt="legal" width="1000"/>
+<img src="images/blogs/film-different-context.png" alt="legal" width="1000"/> -->
 
 My impression is that **updates to `CONTEXT`** have been more widely explored in LLM literature compared to `DATA_SOURCE`.
 
