@@ -143,11 +143,13 @@ Below, the updated result includes previously seen content (blue/yellow) and als
 
 <img src="/images/blogs/glaive-3-mid-updated.png" alt="legal" width="800"/>
 
-In more complex multi-hop QA, we can still trace how output depends on intermediate reasoning. Here’s an example from [2WikiMultiHopQA](https://huggingface.co/datasets/xanhho/2WikiMultihopQA) using [deepseek-ai/DeepSeek-R1-Distill-Qwen-7B](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B):
+In a more complex scenario like multi-hop QA, we can still trace how output depends on intermediate reasoning. Here’s an example from [2WikiMultiHopQA](https://huggingface.co/datasets/xanhho/2WikiMultihopQA) using [deepseek-ai/DeepSeek-R1-Distill-Qwen-7B](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B):
 
 <img src="/images/blogs/film-original.png" alt="legal" width="1000"/>
 
-Blue/red boxes highlight direct facts. The yellow box shows the final reasoning step. The model first extracts two key facts before comparison—following the "bridge entity and comparison" pattern in [2WikiMultiHopQA](https://aclanthology.org/2020.coling-main.580.pdf).
+Blue/red boxes highlight direct facts. The yellow box shows the final reasoning step. The model first extracts two key facts before comparison—following the "bridge entity and comparison" pattern in [2WikiMultiHopQA](https://aclanthology.org/2020.coling-main.580.pdf). The blue and red boxes both show higher attention scores compared to other sentences in the prompt (except for the question). 
+
+I also noticed that in general, sentence that contains numbers (e.g., time) typically triggers higher attention score. In this case, the green box has higher attention score than blue boxes in the same row, despite the relevance. This could impact accuracy of dependency detection if attention score is used to track correlation chains.   
 
 <img src="/images/blogs/2wiki-bridge.png" alt="2wiki" width="600"/>
 
@@ -238,15 +240,14 @@ The goal remains: **reuse past computation** whenever possible.
      - A summary of milestones and execution plans (which further depends on summarization of the planning/design documents).
      - Tasks assigned during meetings (which further depends on summarization of the conversation in the meeting recordings).
 
+Coming back to the film director example earlier, the first heatmap shows attention score distribution comparing the nationalities of the two directors, as we have seen earlier. I tried changing the question from comparing nationalities of two directors to comparing the ages of the two directors and print out attention score map in the second heatmap. In this simplistic example, the two attention states, have similar distribution up to the second to last row, which is the generated sentence that reaches the conclusion. Asking different questions does not seem to change the entry with the highest attention scores across different rows, and the first stage of the reasoning steps are similar. Assuming that we are able to identify shared reasoning steps triggered by different questions, the trick is to predict some of the most commonly used partial results based on set of contexts $S(C)$, and find out how these partial results could be reused by comparing the runtime context with all $C$ such that $C \in S(C)$. Possibly related: [Test-Time Compute](https://arxiv.org/pdf/2504.13171), [Parametric RAG](https://arxiv.org/pdf/2501.15915).
 
 <img src="/images/blogs/film-original.png" alt="legal" width="1000"/>
 <img src="/images/blogs/film-age.png" alt="legal" width="1000"/>
+
 <img src="/images/blogs/film-different-context.png" alt="legal" width="1000"/>
 
 My impression is that **updates to `CONTEXT`** have been more widely explored in LLM literature compared to `DATA_SOURCE`.
 
-See:
-- [Test-Time Compute](https://arxiv.org/pdf/2504.13171)
-- [Parametric RAG](https://arxiv.org/pdf/2501.15915)
 
 <!-- Future directions: indexing context, caching for reuse, long vs. short generation -->
