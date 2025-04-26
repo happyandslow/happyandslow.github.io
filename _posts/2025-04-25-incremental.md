@@ -242,9 +242,11 @@ The goal remains: **reuse past computation** whenever possible.
 
 Coming back to the film director example earlier, the first heatmap shows attention score distribution comparing the nationalities of the two directors, as we have seen earlier. I tried changing the question from comparing nationalities of two directors to comparing the ages of the two directors and print out attention score map in the second heatmap. 
 
+In this simplistic example, the two attention states, have similar distribution up to the second to last row, which is the generated sentence that reaches the conclusion. Asking different questions does not seem to change the entry with the highest attention scores across different rows, and the first stage of the reasoning steps are similar. Assuming that we are able to identify shared reasoning steps triggered by different questions, the trick is to predict some of the most commonly used partial results based on set of contexts $S(C)$, and find out how these partial results could be reused by comparing the runtime context with all $C$ such that $C \in S(C)$. Possibly related: [Test-Time Compute](https://arxiv.org/pdf/2504.13171), [Parametric RAG](https://arxiv.org/pdf/2501.15915).
+
 <img src="/images/blogs/film-original.png" alt="legal" width="1000"/>
 <img src="/images/blogs/film-age.png" alt="legal" width="1000"/>
-In this simplistic example, the two attention states, have similar distribution up to the second to last row, which is the generated sentence that reaches the conclusion. Asking different questions does not seem to change the entry with the highest attention scores across different rows, and the first stage of the reasoning steps are similar. Assuming that we are able to identify shared reasoning steps triggered by different questions, the trick is to predict some of the most commonly used partial results based on set of contexts $S(C)$, and find out how these partial results could be reused by comparing the runtime context with all $C$ such that $C \in S(C)$. Possibly related: [Test-Time Compute](https://arxiv.org/pdf/2504.13171), [Parametric RAG](https://arxiv.org/pdf/2501.15915).
+
 
 <img src="/images/blogs/film-different-context.png" alt="legal" width="1000"/>
 
