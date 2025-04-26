@@ -7,7 +7,7 @@ tags:
   - data streaming
 ---
 
-# LLM as Incremental Data Processing Operator
+<!-- # LLM as Incremental Data Processing Operator -->
 **Disclaimer: All opinions my own (not related to the company/team I work for). I know a tiny bit about data streaming systems and I only pretend to know LLMs.**
 
 Most data-intensive (long context or long generation) LLM tasks can be seen as a UDF operator that consumes one or two event streams that look like the following:
@@ -123,12 +123,12 @@ If we can identify the key information in context that is likely to change, and 
 
 The examples below illustrate cases where key information in the input directly influences output, either as a fact or a reasoning bridge:
 
-- <ins>*Question*</ins>: What is the ==cause of death== of the founder of Versus (Versace)?  
-  <ins>*Source*</ins>: "...Versus (Versace)... a gift by the founder Gianni Versace... Versace was ==shot== and killed..."  
-  <ins>*Assistant*</ins>: "... ==shot==..."
+- <ins>*Question*</ins>: What is the <mark>cause of death</mark> of the founder of Versus (Versace)?  
+  <ins>*Source*</ins>: "...Versus (Versace)... a gift by the founder Gianni Versace... Versace was <mark>shot</mark> and killed..."  
+  <ins>*Assistant*</ins>: "... <mark>shot</mark>..."
 
-- <ins>*Question*</ins>: Who is Dambar Shah’s ==grandchild==?  
-  <ins>*Source*</ins>: "Doc1:... Dambar Shah ... He was the ==father of== Krishna Shah. Doc2: Krishna Shah ... He was the ==father of== Rudra Shah."  
+- <ins>*Question*</ins>: Who is Dambar Shah’s <mark>grandchild</mark>?  
+  <ins>*Source*</ins>: "Doc1:... Dambar Shah ... He was the <mark>father of</mark> Krishna Shah. Doc2: Krishna Shah ... He was the <mark>father of</mark> Rudra Shah."  
   <ins>*Assistant*</ins>: "... Rudra Shah ..."
 
 This correlation can help determine whether to skip recomputation or invalidate outputs.
@@ -238,9 +238,10 @@ The goal remains: **reuse past computation** whenever possible.
      - A summary of milestones and execution plans (which further depends on summarization of the planning/design documents).
      - Tasks assigned during meetings (which further depends on summarization of the conversation in the meeting recordings).
 
-<!-- <img src="/images/blogs/film-original.png" alt="legal" width="1000"/>
+
+<img src="/images/blogs/film-original.png" alt="legal" width="1000"/>
 <img src="/images/blogs/film-age.png" alt="legal" width="1000"/>
-<img src="/images/blogs/film-different-context.png" alt="legal" width="1000"/> -->
+<img src="/images/blogs/film-different-context.png" alt="legal" width="1000"/>
 
 My impression is that **updates to `CONTEXT`** have been more widely explored in LLM literature compared to `DATA_SOURCE`.
 
