@@ -247,10 +247,21 @@ In this simplistic example, the two attention states, have similar distribution 
 <img src="/images/blogs/film-original.png" alt="legal" width="1000"/>
 <img src="/images/blogs/film-age.png" alt="legal" width="1000"/>
 
+I tried changing the question to something unrelated to film director and it is easy to see that the attention map starting from the decoding stage is completely different from the two attention map shown earlier. 
 
 <img src="/images/blogs/film-different-context.png" alt="legal" width="1000"/>
 
-My impression is that **updates to `CONTEXT`** have been more widely explored in LLM literature compared to `DATA_SOURCE`.
+If we are able to make the analogy that updates to the stream of `CONTEXT` are constantly changing tasks/queries based on fixed pool of source data, and updates to the stream of `DATA_SOURCE` are constantly updating pool of source data where a single task is based on. My impression is that updates to `CONTEXT` is better explored than updates received at `DATA_SOURCE` based on (probably only a few out of many) papers I had impression on:
+The obvious question to ask here is that if we treat LLM as a data processing operator (which it is), then this problem would clearly overlap with some of the traditional problems in OLAP systems due to the possibilities of semantic reasoning of new tasks received at the stream of `CONTEXT`. To make the full analogy, these problems could include the [view selection problem](https://arxiv.org/pdf/2412.11828v1), the [view maintenance problem](https://arxiv.org/pdf/2203.16684), and the [query re-writing problem](https://dl.acm.org/doi/pdf/10.1145/376284.375706). Specifically, if we use QA as an example, on every question we received at the stream of `CONTEXT`:
+
+**Query Re-writing** requires question to be re-written to better match views generated in the past. 
+
+**View Selection** needs a searching mechanism to identify past questions that are semantically similar to the target question (e.g. [VectorQ](https://www.arxiv.org/pdf/2502.03771)). One question I kept wondering was that whether there is a good way to find a series of "base questions" that we predict will be useful to the questions we receive online -- Like the questions like "Which director is older" or "Are these directors are of the same nationality" can be both answered by the combining the answer of "Tell me about the director of film A" and "Tell me about the director of film B". How to decompose a question into a set of base views that we maintain, and then reason about the performance/cost of using these views are something I'd love to see. 
+
+**View Maintenance**: The partial results maintained by set of questions need to be constantly updated as new updates are received at the stream of `DATA_SOURCE`, which [has been discussed earlier](#updates-to-data_source). 
+
+
+
 
 
 <!-- Future directions: indexing context, caching for reuse, long vs. short generation -->
