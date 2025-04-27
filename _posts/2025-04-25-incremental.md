@@ -45,8 +45,8 @@ The most relevant work I’ve found discussing something similar to view mainten
 Each individual view is maintained as a plain list (without a graph-based index), which might result in longer search/update times if the view contains a large amount of data.
 <img src="/images/blogs/vectraflow.png" alt="vectraflow" width="200"/>
 
-### Maintaining incremental states for LLM memory
-#### Textual Memory
+### Maintaining incremental LLM memory (Textual Memory)
+
 **Structured/Semi-structured Memory with semantic operators:** An example of imposing semantics on top of an LLM operator is [Lotus](). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
 
 This could convert a long-context QA example into the following: using Lotus as an example, the query 1. retrieves top papers most relevant to my research area, 2. generates insight for each paper, and 3. creates a digest summarizing the research insights.
@@ -84,7 +84,7 @@ Thus, we can selectively update outputs when their input subgraphs change. Anoth
 
 HippoRAG makes reasoning explicit via a knowledge graph. However, reasoning is increasingly handled implicitly by LLMs, so the retrieval (or broader "information extraction") is embedded in the inference process. This motivates studying how textual memory relates to parameterized memory.
 
-#### Parameterized Memory
+### Maintaining incremental LLM memory (Parameterized Memory)
 Assuming the LLM can retrieve/reason from both context and its trained memory, can it "update" results when `DATA_SOURCE` changes?
 
 [2WikiMultiHopQA](https://arxiv.org/pdf/2011.01060v2) provides reasoning examples with annotated key entities and relations—almost like implicit graphs. The question: when the LLM reasons internally, can it incrementally maintain this reasoning if the dependency graph is implicit?
@@ -161,56 +161,6 @@ When I changed a relevant fact—like nationality—the model’s attention shif
 
 <img src="/images/blogs/film-nationality.png" alt="legal" width="1000"/>
 
-#### Questions to ask
-
-**Tracking intra-context dependencies?**  
-If we can accurately identify dependency structures, how much can we save?
-
-By default, even small changes to `DATA_SOURCE` trigger full prefill (possibly reusable) and full decode. Ideally, incremental processing avoids recomputation by:
-
-1. **Saving prefill compute**: Predict which KV cache entries are still valid. Many works already exploit sparsity or modular KV reuse.
-2. **Saving decode compute**: If outputs remain similar after context changes, we can predict when to reuse vs. regenerate tokens.
-
-This opens doors to innovations like:
-- Reusing tokens as constraints in decoding
-- Exploring *KV editing* and *non-consecutive KV reuse* techniques
-
-**Semantic-aware KV cache?**  
-KV cache today is usually read-append and treated as semantic-agnostic. But with reasoning models and long-context generation, recent work is moving toward offloading IO-heavy ops out of HBM—see:
-
-- [KTransformers](https://github.com/kvcache-ai/ktransformers)
-- [RetrievalAttention](https://arxiv.org/pdf/2409.10516)
-- [AlayaDB](https://arxiv.org/pdf/2504.10326)
-
-As reasoning becomes more common, we can assume that key information used in decoding will reside in the KV cache. Exploiting *semantic-aware KV cache* might support:
-
-- Token-level KV reuse
-- KV editing
-- Indexing / versioning in KV cache design
-- Layout optimizations for efficient memory transfer
-
-**Structured memory vs. implicit reasoning?**  
-Most reasoning models appear to first summarize `DATA_SOURCE`, then extract reasoning steps. If we can differentiate these steps (i.e., the model’s internal graph), we may better track dependencies between output and both source data and intermediate reasoning.
-
-This is reminiscent of [HippoRAG](#using-udf-operator), where the knowledge graph is explicit. In LLMs, that structure is often implicit—but perhaps can be inferred.
-
-One might ask: why not convert `DATA_SOURCE` into a structured form like a knowledge graph and maintain it explicitly?
-
-Pros:
-- Incremental maintenance via graph updates
-- Explicit dependencies simplify recomputation
-
-Cons:
-- Each update may trigger an LLM call
-- Updates may invalidate large portions of downstream output
-
-Trade-offs will vary:
-- Length of context
-- Number of past results being maintained
-- How much computation can be skipped
-
-This is similar to the broader debate between long-context LLMs and RAG—more on that in a future discussion.
-
 ## Updates to `CONTEXT`
 
 Let’s return to our initial continuous view definition:
@@ -262,6 +212,55 @@ The obvious question to ask here is that if we treat LLM as a data processing op
 
 
 
+## Questions to ask
+
+**Tracking intra-context dependencies?**  
+If we can accurately identify dependency structures, how much can we save?
+
+By default, even small changes to `DATA_SOURCE` trigger full prefill (possibly reusable) and full decode. Ideally, incremental processing avoids recomputation by:
+
+1. **Saving prefill compute**: Predict which KV cache entries are still valid. Many works already exploit sparsity or modular KV reuse.
+2. **Saving decode compute**: If outputs remain similar after context changes, we can predict when to reuse vs. regenerate tokens.
+
+This opens doors to innovations like:
+- Reusing tokens as constraints in decoding
+- Exploring *KV editing* and *non-consecutive KV reuse* techniques
+
+**Semantic-aware KV cache?**  
+KV cache today is usually read-append and treated as semantic-agnostic. But with reasoning models and long-context generation, recent work is moving toward offloading IO-heavy ops out of HBM—see:
+
+- [KTransformers](https://github.com/kvcache-ai/ktransformers)
+- [RetrievalAttention](https://arxiv.org/pdf/2409.10516)
+- [AlayaDB](https://arxiv.org/pdf/2504.10326)
+
+As reasoning becomes more common, we can assume that key information used in decoding will reside in the KV cache. Exploiting *semantic-aware KV cache* might support:
+
+- Token-level KV reuse
+- KV editing
+- Indexing / versioning in KV cache design
+- Layout optimizations for efficient memory transfer
+
+**Structured memory vs. implicit reasoning?**  
+Most reasoning models appear to first summarize `DATA_SOURCE`, then extract reasoning steps. If we can differentiate these steps (i.e., the model’s internal graph), we may better track dependencies between output and both source data and intermediate reasoning.
+
+This is reminiscent of [HippoRAG](#using-udf-operator), where the knowledge graph is explicit. In LLMs, that structure is often implicit—but perhaps can be inferred.
+
+One might ask: why not convert `DATA_SOURCE` into a structured form like a knowledge graph and maintain it explicitly?
+
+Pros:
+- Incremental maintenance via graph updates
+- Explicit dependencies simplify recomputation
+
+Cons:
+- Each update may trigger an LLM call
+- Updates may invalidate large portions of downstream output
+
+Trade-offs will vary:
+- Length of context
+- Number of past results being maintained
+- How much computation can be skipped
+
+This is similar to the broader debate between long-context LLMs and RAG—more on that in a future discussion.
 
 
 <!-- Future directions: indexing context, caching for reuse, long vs. short generation -->
