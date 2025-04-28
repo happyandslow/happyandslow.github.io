@@ -10,7 +10,7 @@ tags:
 <!-- # LLM as Incremental Data Processing Operator -->
 **Disclaimer: All opinions my own (not related to the company/team I work for). I know a tiny bit about data streaming systems and I only pretend to know LLMs.**
 
-Most data-intensive (long context or long generation) LLM tasks can be seen as a UDF operator that consumes one or two event streams that look like the following:
+Most data-intensive (long context or long generation) LLM tasks can be seen as a data processing operator that consumes one or two event streams that look like the following:
 
 ```sql
 -- Continuous "query" defining the behavior of an LLM-based chatbot
@@ -45,9 +45,11 @@ The most relevant work I’ve found discussing something similar to view mainten
 Each individual view is maintained as a plain list (without a graph-based index), which might result in longer search/update times if the view contains a large amount of data.
 <img src="/images/blogs/vectraflow.png" alt="vectraflow" width="200"/>
 
+I think the authors might still be working on the full version of the work: it'd be interesting to see how this approach would affect result accuracy over time. 
+
 ### Maintaining incremental LLM memory (Textual Memory)
 
-**Using semantic operators:** An example of imposing semantics on top of an LLM operator is [Lotus](). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
+**Using semantic operators:** An example of imposing semantics on top of an LLM operator is [LOTUS](https://www.arxiv.org/abs/2407.11418). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
 
 This could convert a long-context QA example into the following: using Lotus as an example, the query 1. retrieves top papers most relevant to my research area, 2. generates insight for each paper, and 3. creates a digest summarizing the research insights.
 <img src="/images/blogs/lotus1.png" alt="lotus1" width="800"/>
@@ -58,9 +60,8 @@ Say I make the following modification to my `DATA_SOURCE` (a collection of paper
 1. <ins>Adding a new paper</ins>: If the paper is close to the target topic in vector space (via `sem_index` and `sem_join`), then the insight generated (via `sem_map`) would be pushed to `sem_agg` for aggregation. The paper mentions one technique for `sem_agg` is incrementally folding new input, which naturally supports incremental computation. *However, not all aggregation operations support incremental computation naturally, e.g., global ranking.*
 2. <ins>Removing a paper</ins> (or its expiration via TTL): If the removed paper wasn’t selected in the digest, this has no effect. Otherwise, we must:
    - Maintain `sem_index` by removing the entry—this overlaps with [Maintaining incremental states on vector DB](#Maintaining-incremental-states-on-vector-DB).
-   - Address the challenge of removing its contribution from `sem_agg`, which is hard if the aggregation is not invertible. One optimization is to maintain partial computational results in memory, e.g., tree-based aggregation allows partial reuse.
-
-<img src="/images/blogs/lotus2.png" alt="lotus2" width="800"/>
+   - Address the challenge of removing its contribution from `sem_agg`, which is hard if the aggregation is not invertible (e.g., "Writing a digest summarizing research"). One optimization is to maintain partial computational results in memory for possible re-use, e.g., tree-based aggregation steps 1-2, 3-4, 1-2-3-4 takes three steps and modifying 4 to 4' requires re-computation of 3-4' and 1-2-3-4', and we are able to re-use 1-2. 
+ 
 
 The figure above shows semantic operators in Lotus. Many of these are derived from relational operators, so modifications to `DATA_SOURCE` should map to existing literature.
 
@@ -122,7 +123,7 @@ As updates stream in, this forms a chronological log of deltas, naturally suppor
 
 If we can identify the key information in context that is likely to change, and correlate it with the generated output, we can perform efficient updates.
 
-The examples below illustrate cases where key information in the input directly influences output, either as a fact or a reasoning bridge:
+The examples below illustrate cases where key information in the input directly influences output, either as a fact or a reasoning bridge (examples from [2WikiMultiHopQA](https://arxiv.org/pdf/2011.01060v2) dataset):
 
 - \[*Question*\]: What is the <mark>cause of death</mark> of the founder of Versus (Versace)?  
   \[*Source*\]: "...Versus (Versace)... a gift by the founder Gianni Versace... Versace was <mark>shot</mark> and killed..."  
@@ -150,7 +151,7 @@ In a more complex scenario like multi-hop QA, we can still trace how output depe
 
 Blue/red boxes highlight direct facts. The yellow box shows the final reasoning step. The model first extracts two key facts before comparison—following the "bridge entity and comparison" pattern in [2WikiMultiHopQA](https://aclanthology.org/2020.coling-main.580.pdf). The blue and red boxes both show higher attention scores compared to other sentences in the prompt (except for the question). 
 
-I also noticed that in general, sentence that contains numbers (e.g., time) typically triggers higher attention score. In this case, the green box has higher attention score than blue boxes in the same row, despite the relevance. This could impact accuracy of dependency detection if attention score is used to track correlation chains.   
+We also know that sentence that contains numbers (e.g., time) typically triggers higher attention score. In this case, the green box has higher attention score than blue boxes in the same row, despite the relevance. This could impact accuracy of dependency detection if attention score is used to track correlation chains.   
 
 <img src="/images/blogs/2wiki-bridge.png" alt="2wiki" width="600"/>
 
@@ -167,10 +168,12 @@ When I changed a relevant fact—like nationality—the model’s attention shif
 Let’s return to our initial continuous view definition:
 
 ```sql
+-- Continuous "query" defining the behavior of an LLM-based chatbot
 CREATE CONTINUOUS VIEW response_stream AS
 LLM_GENERATE(
-    CONTEXT=STREAM(conversation_events),
-    DATA_SOURCE=STREAM(support_docs_or_events)
+    PROMPT="Given conversation context and support docs, generate a helpful response.",
+    CONTEXT=STREAM(conversation_events),        -- user interactions, updates incrementally
+    DATA_SOURCE=STREAM(support_docs_or_events)  -- knowledge updates streamed incrementally
 );
 ```
 
@@ -202,8 +205,9 @@ I tried changing the question to something unrelated to film director and it is 
 
 <img src="/images/blogs/film-different-context.png" alt="legal" width="1000"/>
 
-If we are able to make the analogy that updates to the stream of `CONTEXT` are constantly changing tasks/queries based on fixed pool of source data, and updates to the stream of `DATA_SOURCE` are constantly updating pool of source data where a single task is based on. My impression is that updates to `CONTEXT` is better explored than updates received at `DATA_SOURCE` based on (probably only a few out of many) papers I had impression on:
-The obvious question to ask here is that if we treat LLM as a data processing operator (which it is), then this problem would clearly overlap with some of the traditional problems in OLAP systems due to the possibilities of semantic reasoning of new tasks received at the stream of `CONTEXT`. To make the full analogy, these problems could include the [view selection problem](https://arxiv.org/pdf/2412.11828v1), the [view maintenance problem](https://arxiv.org/pdf/2203.16684), and the [query re-writing problem](https://dl.acm.org/doi/pdf/10.1145/376284.375706). Specifically, if we use QA as an example, on every question we received at the stream of `CONTEXT`:
+If we are able to make the analogy that updates to the stream of `CONTEXT` are constantly changing tasks/queries based on fixed pool of source data, and updates to the stream of `DATA_SOURCE` are constantly updating pool of source data where a single task is based on. 
+
+My impression is that updates to `CONTEXT` is better explored than updates received at `DATA_SOURCE` based on (probably only a few out of many) papers I had impression on. The obvious question to ask here is that if we treat LLM as a data processing operator (which it is), then this problem would clearly overlap with some of the traditional problems in OLAP systems due to the possibilities of semantic reasoning of new tasks received at the stream of `CONTEXT`. To make the full analogy, these problems could include the [view selection problem](https://arxiv.org/pdf/2412.11828v1), the [view maintenance problem](https://arxiv.org/pdf/2203.16684), and the [query re-writing problem](https://dl.acm.org/doi/pdf/10.1145/376284.375706). Specifically, if we use QA as an example, on every question we received at the stream of `CONTEXT`:
 
 <ins>Query Re-writing</ins> requires question to be re-written to better match views generated in the past. 
 
@@ -215,18 +219,11 @@ The obvious question to ask here is that if we treat LLM as a data processing op
 
 ## Thoughts and Questions
 
-
- 
-
-<!-- In the context of LLMs and their ecosystems, this problem can be directly mapped to the tiers mentioned above. The “knowledge” tier of LLM memories, which contains all contextual information processed by the models (in the form of both textual memories and KV caches), can be seen as a “view.” The hypothesis is that there are opportunities to build an “incrementally managed memory” for LLM-driven applications. The exact definition of “memory” depends on which tier is being considered.
-In the short term, this problem should be investigated at layer 4 (which may in turn enable optimization of layer 3). This is because layer 4 represents universal abstractions shared by all LLM applications, whereas everything above layer 4 is model-specific. It would also be worthwhile to explore whether a universal communication layer could be created for layer 3 (or layer 2), so that different models could communicate directly through parameters rather than through natural language.
-In the long run, this same problem should be extended to tier 2 (and possibly tier 1) as the models’ reasoning capabilities suggest increased reuse of their internal states. Below is a list of subproblems that need to be addressed: -->
-
 **Tracking intra-context dependencies?**  
 
 If we can accurately identify dependency structures, how much can we save?
 
-By default, even small changes to `DATA_SOURCE` trigger full prefill (possibly reusable) and full decode. Ideally, incremental processing avoids recomputation by:
+By default, even small changes to `DATA_SOURCE` trigger a full prefill (possibly reusable) and a full decode. Ideally, incremental processing avoids recomputation by:
 
 1. **Saving prefill compute**: Predict which KV cache entries are still valid. Many works already exploit sparsity or modular KV reuse.
 2. **Saving decode compute**: If outputs remain similar after context changes, we can predict when to reuse vs. regenerate tokens.
@@ -237,26 +234,30 @@ This opens doors to innovations like:
 
 **Semantic-aware KV cache?**  
 
-KV cache today is usually read-append and treated as semantic-agnostic. But with reasoning models and long-context generation, recent work is moving toward offloading IO-heavy ops out of HBM—see:
+Today, KV cache is typically used as a read-append data store and is treated as semantic-agnostic. However, with reasoning models and long-context generation, recent work has been moving toward offloading IO-heavy operations out of HBM—see:
 
 - [KTransformers](https://github.com/kvcache-ai/ktransformers)
 - [RetrievalAttention](https://arxiv.org/pdf/2409.10516)
 - [AlayaDB](https://arxiv.org/pdf/2504.10326)
 
-As reasoning becomes more common, we can assume that key information used in decoding will reside in the KV cache. Exploiting *semantic-aware KV cache* might support:
+As reasoning becomes more common, we can assume that key information used during decoding will increasingly reside in the KV cache. Exploiting *semantic-aware KV cache* might enable:
 
 - Token-level KV reuse
 - KV editing
-- Indexing / versioning in KV cache design
+- Indexing/versioning in KV cache design
 - Layout optimizations for efficient memory transfer
+
+**View Maintenance over the Entire Workflow?**  
+
+So far the discussion on maintaining incremental memory is under the assumption of LLM as a single data processing operator. In practice, the operator could easily be as single step out of a complex multi-step job like workflow/multi-agent scenarios. The multi-step view management could create a problem space for rethinking programming framework along with resource aware optimizations. 
 
 **Structured memory vs. implicit reasoning?**  
 
-Most reasoning models appear to first summarize `DATA_SOURCE`, then extract reasoning steps. If we can differentiate these steps (i.e., the model’s internal graph), we may better track dependencies between output and both source data and intermediate reasoning.
+Most reasoning models first summarize `DATA_SOURCE`, then extract reasoning steps. If we can differentiate these steps (i.e., the model’s internal graph), we may better track dependencies between outputs and both source data and intermediate reasoning.
 
-This is reminiscent of [HippoRAG](#using-udf-operator), where the knowledge graph is explicit. In LLMs, that structure is often implicit—but perhaps can be inferred.
+This resembles [HippoRAG](#using-udf-operator), where the knowledge graph is explicit. In LLMs, the structure is often implicit—but perhaps can be inferred.
 
-One might ask: why not convert `DATA_SOURCE` into a structured form like a knowledge graph and maintain it explicitly?
+One might ask: why not explicitly convert `DATA_SOURCE` into a structured form like a knowledge graph?
 
 Pros:
 - Incremental maintenance via graph updates
@@ -266,30 +267,39 @@ Cons:
 - Each update may trigger an LLM call
 - Updates may invalidate large portions of downstream output
 
-Trade-offs will vary:
+Trade-offs will vary depending on:
 - Length of context
 - Number of past results being maintained
-- How much computation can be skipped
+- Amount of computation that can be skipped
 
 This is similar to the broader debate between long-context LLMs and RAG—more on that in a future discussion.
 
 **Emergence of Slow Compute?**  
 
-The general rationale behind managing a semantic-aware memory systems for generative AI is that we should attempt to trade expensive computation for cheaper storage by preserving and reusing processed data. Therefore, ideally LLM does not have to "re-learn" anything or spend marginal cognitive energy to learn new knowledge. This allows models to become more capable over time as it 1. memorizes more information, 2. learns the latest updates and memorize them and 3. performs inference much faster and more resource efficient. Building incremental memory system should be part of effort enabling continual learning for generative AI. 
+The general rationale behind managing semantic-aware memory systems for generative AI is that we should attempt to trade expensive computation for cheaper storage by preserving and reusing processed data. Ideally, LLMs should not need to "re-learn" learned information or only spend marginal cognitive effort to incorporate new knowledge. This allows models to become more capable over time as they:  
+1. Memorize more information,  
+2. Learn the latest updates and store them, and  
+3. Perform inference much faster and more resource-efficiently.  
+
+Building incremental memory systems should be part of enabling continual learning for generative AI.
 
 <img src="/images/blogs/layers.png" alt="legal" width="400"/>
 
-Most of the problems discussed in this post focused on the dynamic parameterized memory (e.g., KV cache) and textual memory, as shown in the green box above, which should be shared as a service across models and applications. But what does this imply from the system-building perspective?
+Most of the problems discussed in this post focus on dynamic parameterized memory (e.g., KV cache) and textual memory, shown in the green box above, which should be shared as a service across models and applications. But what does this imply from a system-building perspective?
 
-Incremental processing (if done right) should reduce computation significantly, as [discussed previously](#maintaining-incremental-llm-memory-parameterized-memory): 
+Incremental processing (if done right) should reduce computation significantly, as [discussed previously](#maintaining-incremental-llm-memory-parameterized-memory):
 
-If we choose **Append delta as conversation** (<ins>best generalizability, least cost effective</ins>), which is the most generalizable approach, the updates are maintained as logs as part of the textual memory. The challenge rises at *where* to maintain update history, as well as *how* and *when* to compact update history to fit in model's context window. 
+If we choose **Append delta as conversation** (<ins>best generalizability, least cost-effective</ins>), the updates are maintained as logs in the textual memory. The challenge then becomes *where* to maintain update history, as well as *how* and *when* to compact the update history to fit within the model's context window.
 
-If we choose to **Recompute sub-paragraph** (<ins>medium generalizability, medium cost effective</ins>), we should be able to identify reusable tokens from past results. The generation process would be a mix of decoding/prefilling requests similar to constraint-decoding. This could change most of the engine design that based on the assumption that LLM inference is single round prefill + decode.  Meanwhile, depending on the reusability of KV cache, this could result in frequent, token-level updates to stored KV on every update request. Making KV cache a more compute-intensive component. 
+If we choose to **Recompute sub-paragraphs** (<ins>medium generalizability, medium cost-effectiveness</ins>), we should identify reusable tokens from past results. The generation process would mix decoding and prefilling requests—similar to constraint-decoding. This could fundamentally change engine design, which traditionally assumes LLM inference is a single round of prefill + decode.  
+Meanwhile, depending on KV cache reusability, this approach could result in frequent, token-level updates to stored KV on every update request, making the KV cache a more compute-intensive component.
 
-In the scenario where **Replace keywords** (<ins>least generalizability, most cost effective</ins>) is possible, the update process could be done directly at where the result is stored. This eliminate the needs for accelerator completely. Making it possible to perform "near-storage inference". The challenge here, is that we are able to pre-establish mappings between key words in source data and inference result offline. 
+In the scenario where **Replace keywords** (<ins>least generalizability, most cost-effective</ins>) is possible, the update process could happen directly where results are stored. This eliminates the need for accelerators entirely, enabling "near-storage inference."  
+The challenge here is that mappings between key words in source data and inference results must be pre-established offline.
 
-Pre-establishing this mapping, along with several potential directions discussed previously (e.g., tracking dependency structure, query re-writing, view maintenance and selection, etc.) can all be seen as attempts to **externalize LLM's thought process from fast to slow (but larger) storage**. Many of these operations are also not directly triggered by any immediate request and must be carried out of inference's critical path as part of the maintenance process. 
-It is possible, I think, the focus of building LLM serving stack, would start to shift from optimizing inference task on **fast compute devices** (e.g., mostly accelerators) to **a more collaborative, full-stack solution that leverages slow compute** (i.e., near-storage) to extract information that further enhance real-time inference from both performance and efficiency perspectives.  
+Pre-establishing such mappings, along with other potential directions discussed earlier (e.g., [tracking dependency structures, query rewriting, view maintenance and selection](#updates-to-context)), can all be seen as attempts to **externalize LLM's thought process from fast to slow (but larger) storage**.  Many of these operations are not triggered by immediate requests and must happen off the inference critical path as part of background maintenance.  
+
+It is possible, I think, that the focus of building LLM serving stacks will start shifting—from purely optimizing inference tasks on **fast compute devices** (e.g., accelerators)—to **more collaborative, full-stack solutions that leverage slow compute** (i.e., near-storage) to enhance real-time inference, both in terms of performance and efficiency.
+  
 
 <!-- Future directions: indexing context, caching for reuse, long vs. short generation -->
