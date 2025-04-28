@@ -215,17 +215,15 @@ The obvious question to ask here is that if we treat LLM as a data processing op
 
 ## Thoughts and Questions
 
-**Emergence of Slow Compute?**  
-<img src="/images/blogs/layers.png" alt="legal" width="400"/>
 
-The general rationale behind managing a semantic-aware memory systems for generative AI is that we should attempt to trade expensive computation for cheaper storage by preserving and reusing processed data. Therefore, ideally LLM does not have to "re-learn" anything or spend marginal cognitive energy to learn new knowledge. This allows models to become more capable over time as it 1. memorizes more information, 2. learns the latest updates and memorize them and 3. performs inference much faster and more resource efficient. 
-
+ 
 
 <!-- In the context of LLMs and their ecosystems, this problem can be directly mapped to the tiers mentioned above. The “knowledge” tier of LLM memories, which contains all contextual information processed by the models (in the form of both textual memories and KV caches), can be seen as a “view.” The hypothesis is that there are opportunities to build an “incrementally managed memory” for LLM-driven applications. The exact definition of “memory” depends on which tier is being considered.
 In the short term, this problem should be investigated at layer 4 (which may in turn enable optimization of layer 3). This is because layer 4 represents universal abstractions shared by all LLM applications, whereas everything above layer 4 is model-specific. It would also be worthwhile to explore whether a universal communication layer could be created for layer 3 (or layer 2), so that different models could communicate directly through parameters rather than through natural language.
 In the long run, this same problem should be extended to tier 2 (and possibly tier 1) as the models’ reasoning capabilities suggest increased reuse of their internal states. Below is a list of subproblems that need to be addressed: -->
 
 **Tracking intra-context dependencies?**  
+
 If we can accurately identify dependency structures, how much can we save?
 
 By default, even small changes to `DATA_SOURCE` trigger full prefill (possibly reusable) and full decode. Ideally, incremental processing avoids recomputation by:
@@ -234,10 +232,11 @@ By default, even small changes to `DATA_SOURCE` trigger full prefill (possibly r
 2. **Saving decode compute**: If outputs remain similar after context changes, we can predict when to reuse vs. regenerate tokens.
 
 This opens doors to innovations like:
-- Reusing tokens as constraints in decoding
+- Reusing tokens and KVs 
 - Exploring *KV editing* and *non-consecutive KV reuse* techniques
 
 **Semantic-aware KV cache?**  
+
 KV cache today is usually read-append and treated as semantic-agnostic. But with reasoning models and long-context generation, recent work is moving toward offloading IO-heavy ops out of HBM—see:
 
 - [KTransformers](https://github.com/kvcache-ai/ktransformers)
@@ -252,6 +251,7 @@ As reasoning becomes more common, we can assume that key information used in dec
 - Layout optimizations for efficient memory transfer
 
 **Structured memory vs. implicit reasoning?**  
+
 Most reasoning models appear to first summarize `DATA_SOURCE`, then extract reasoning steps. If we can differentiate these steps (i.e., the model’s internal graph), we may better track dependencies between output and both source data and intermediate reasoning.
 
 This is reminiscent of [HippoRAG](#using-udf-operator), where the knowledge graph is explicit. In LLMs, that structure is often implicit—but perhaps can be inferred.
@@ -273,5 +273,23 @@ Trade-offs will vary:
 
 This is similar to the broader debate between long-context LLMs and RAG—more on that in a future discussion.
 
+**Emergence of Slow Compute?**  
+
+The general rationale behind managing a semantic-aware memory systems for generative AI is that we should attempt to trade expensive computation for cheaper storage by preserving and reusing processed data. Therefore, ideally LLM does not have to "re-learn" anything or spend marginal cognitive energy to learn new knowledge. This allows models to become more capable over time as it 1. memorizes more information, 2. learns the latest updates and memorize them and 3. performs inference much faster and more resource efficient. Building incremental memory system should be part of effort enabling continual learning for generative AI. 
+
+<img src="/images/blogs/layers.png" alt="legal" width="400"/>
+
+Most of the problems discussed in this post focused on the dynamic parameterized memory (e.g., KV cache) and textual memory, as shown in the green box above, which should be shared as a service across models and applications. But what does this imply from the system-building perspective?
+
+Incremental processing (if done right) should reduce computation significantly, as [discussed previously](#maintaining-incremental-llm-memory-parameterized-memory): 
+
+If we choose **Append delta as conversation** (<ins>best generalizability, least cost effective</ins>), which is the most generalizable approach, the updates are maintained as logs as part of the textual memory. The challenge rises at *where* to maintain update history, as well as *how* and *when* to compact update history to fit in model's context window. 
+
+If we choose to **Recompute sub-paragraph** (<ins>medium generalizability, medium cost effective</ins>), we should be able to identify reusable tokens from past results. The generation process would be a mix of decoding/prefilling requests similar to constraint-decoding. This could change most of the engine design that based on the assumption that LLM inference is single round prefill + decode.  Meanwhile, depending on the reusability of KV cache, this could result in frequent, token-level updates to stored KV on every update request. Making KV cache a more compute-intensive component. 
+
+In the scenario where **Replace keywords** (<ins>least generalizability, most cost effective</ins>) is possible, the update process could be done directly at where the result is stored. This eliminate the needs for accelerator completely. Making it possible to perform "near-storage inference". The challenge here, is that we are able to pre-establish mappings between key words in source data and inference result offline. 
+
+Pre-establishing this mapping, along with several potential directions discussed previously (e.g., tracking dependency structure, query re-writing, view maintenance and selection, etc.) can all be seen as attempts to **externalize LLM's thought process from fast to slow (but larger) storage**. Many of these operations are also not directly triggered by any immediate request and must be carried out of inference's critical path as part of the maintenance process. 
+It is possible, I think, the focus of building LLM serving stack, would start to shift from optimizing inference task on **fast compute devices** (e.g., mostly accelerators) to **a more collaborative, full-stack solution that leverages slow compute** (i.e., near-storage) to extract information that further enhance real-time inference from both performance and efficiency perspectives.  
 
 <!-- Future directions: indexing context, caching for reuse, long vs. short generation -->
