@@ -66,7 +66,7 @@ The figure above shows semantic operators in Lotus. Many of these are derived fr
 
 Some operations like `sem_filter` and `sem_map` are easier to support incrementally—requiring one LLM inference each. Others like `sem_join`, `sem_topk`, and `sem_agg` require maintaining historical state or performing multiple inference requests. Whether `sem_agg` supports deletions depends on the language expression (e.g., natural language predicate) used by the user.
 
-Additionally, the cost of using semantic operators could be high. Operators use LLMs to evaluate boolean predicates on input pairs (e.g., `sem_join` takes MxN LLM calls, `sem_topk` takes NlogN). This is cheap and SIMD-friendly in databases but expensive in LLMs. This opens optimization avenues:
+Additionally, the cost of using semantic operators could be high. Operators use LLMs to evaluate boolean predicates on input pairs (e.g., `sem_join` takes MxN LLM calls, `sem_topk` takes $O(NlogN)$). This is cheap and SIMD-friendly in databases but expensive in LLMs. This opens optimization avenues:
 - Fine-tune small LLMs/adapters per operator
 - Operator-specific quantization
 - Leverage attention sparsity
@@ -84,7 +84,6 @@ Thus, we can selectively update outputs when their input subgraphs change. Anoth
 
 HippoRAG makes reasoning explicit via a knowledge graph. However, reasoning is increasingly handled implicitly by LLMs, so the retrieval (or broader "information extraction") is embedded in the inference process. This motivates studying how textual memory relates to parameterized memory.
 
-Incremental RAG () and incremental summarization ()
 
 ### Maintaining incremental LLM memory (Parameterized Memory)
 Assuming the LLM can retrieve/reason from both context and its trained memory, can it "update" results when `DATA_SOURCE` changes?
