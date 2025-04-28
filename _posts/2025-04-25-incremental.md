@@ -1,5 +1,5 @@
 ---
-title: 'LLM as Incremental Data Processing Operator'
+title: 'On Incremental LLM Memory'
 date: 2025-04-25
 permalink: /posts/2025/04/blog-post-1/
 tags:
@@ -193,7 +193,7 @@ The goal remains: **reuse past computation** whenever possible.
 
 Coming back to the film director example earlier, the first heatmap shows attention score distribution comparing the nationalities of the two directors, as we have seen earlier. I tried changing the question from comparing nationalities of two directors to comparing the ages of the two directors and print out attention score map in the second heatmap. 
 
-In this simplistic example, the two attention states, have similar distribution up to the second to last row, which is the generated sentence that reaches the conclusion. Asking different questions does not seem to change the entry with the highest attention scores across different rows, and the first stage of the reasoning steps are similar. Assuming that we are able to identify shared reasoning steps triggered by different questions, the trick is to predict some of the most commonly used partial results based on set of contexts $S(C)$, and find out how these partial results could be reused by comparing the runtime context with all $C$ such that $C \in S(C)$. Possibly related: [Test-Time Compute](https://arxiv.org/pdf/2504.13171), [Parametric RAG](https://arxiv.org/pdf/2501.15915).
+In this simplistic example, the two attention states, have similar distribution up to the second to last row, which is the generated sentence that reaches the conclusion. Asking different questions does not seem to change the entry with the highest attention scores across different rows, and the first stage of the reasoning steps are similar. Assuming that we are able to identify shared reasoning steps triggered by different questions, the trick is to predict some of the most commonly used partial results based on set of contexts $S(C)$, and find out how these partial results could be reused by comparing the runtime context with all $C$ such that $C \in S(C)$. Possibly related: [Test-Time Compute](https://arxiv.org/pdf/2504.13171), [Parametric RAG](https://arxiv.org/pdf/2501.15915), [CAG](https://arxiv.org/pdf/2412.15605v1).
 
 <img src="/images/blogs/film-original.png" alt="legal" width="1000"/>
 <img src="/images/blogs/film-age.png" alt="legal" width="1000"/>
@@ -214,6 +214,16 @@ The obvious question to ask here is that if we treat LLM as a data processing op
 
 
 ## Thoughts and Questions
+
+**Emergence of Slow Compute?**  
+<img src="/images/blogs/layers.png" alt="legal" width="400"/>
+
+The general rationale behind managing a semantic-aware memory systems for generative AI is that we should attempt to trade expensive computation for cheaper storage by preserving and reusing processed data. Therefore, ideally LLM does not have to "re-learn" anything or spend marginal cognitive energy to learn new knowledge. This allows models to become more capable over time as it 1. memorizes more information, 2. learns the latest updates and memorize them and 3. performs inference much faster and more resource efficient. 
+
+
+<!-- In the context of LLMs and their ecosystems, this problem can be directly mapped to the tiers mentioned above. The “knowledge” tier of LLM memories, which contains all contextual information processed by the models (in the form of both textual memories and KV caches), can be seen as a “view.” The hypothesis is that there are opportunities to build an “incrementally managed memory” for LLM-driven applications. The exact definition of “memory” depends on which tier is being considered.
+In the short term, this problem should be investigated at layer 4 (which may in turn enable optimization of layer 3). This is because layer 4 represents universal abstractions shared by all LLM applications, whereas everything above layer 4 is model-specific. It would also be worthwhile to explore whether a universal communication layer could be created for layer 3 (or layer 2), so that different models could communicate directly through parameters rather than through natural language.
+In the long run, this same problem should be extended to tier 2 (and possibly tier 1) as the models’ reasoning capabilities suggest increased reuse of their internal states. Below is a list of subproblems that need to be addressed: -->
 
 **Tracking intra-context dependencies?**  
 If we can accurately identify dependency structures, how much can we save?
