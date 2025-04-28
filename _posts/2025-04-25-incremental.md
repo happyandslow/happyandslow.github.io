@@ -47,7 +47,7 @@ Each individual view is maintained as a plain list (without a graph-based index)
 
 ### Maintaining incremental LLM memory (Textual Memory)
 
-**Structured/Semi-structured Memory with semantic operators:** An example of imposing semantics on top of an LLM operator is [Lotus](). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
+**Using semantic operators:** An example of imposing semantics on top of an LLM operator is [Lotus](). One way to reason about LLM operation is to convert `DATA_SOURCE` into structured or unstructured data streams and convert `CONTEXT` into an operator with semantics.
 
 This could convert a long-context QA example into the following: using Lotus as an example, the query 1. retrieves top papers most relevant to my research area, 2. generates insight for each paper, and 3. creates a digest summarizing the research insights.
 <img src="/images/blogs/lotus1.png" alt="lotus1" width="800"/>
@@ -55,8 +55,8 @@ This could convert a long-context QA example into the following: using Lotus as 
 The semantic operators proposed are mostly similar to relational operators. Therefore, the idea of incremental view maintenance should transfer straightforwardly to this framework.
 
 Say I make the following modification to my `DATA_SOURCE` (a collection of papers):
-1. **Adding a new paper**: If the paper is close to the target topic in vector space (via `sem_index` and `sem_join`), then the insight generated (via `sem_map`) would be pushed to `sem_agg` for aggregation. The paper mentions one technique for `sem_agg` is incrementally folding new input, which naturally supports incremental computation. *However, not all aggregation operations support incremental computation naturally, e.g., global ranking.*
-2. **Removing a paper** (or its expiration via TTL): If the removed paper wasn’t selected in the digest, this has no effect. Otherwise, we must:
+1. <ins>Adding a new paper</ins>: If the paper is close to the target topic in vector space (via `sem_index` and `sem_join`), then the insight generated (via `sem_map`) would be pushed to `sem_agg` for aggregation. The paper mentions one technique for `sem_agg` is incrementally folding new input, which naturally supports incremental computation. *However, not all aggregation operations support incremental computation naturally, e.g., global ranking.*
+2. <ins>Removing a paper</ins> (or its expiration via TTL): If the removed paper wasn’t selected in the digest, this has no effect. Otherwise, we must:
    - Maintain `sem_index` by removing the entry—this overlaps with [Maintaining incremental states on vector DB](#Maintaining-incremental-states-on-vector-DB).
    - Address the challenge of removing its contribution from `sem_agg`, which is hard if the aggregation is not invertible. One optimization is to maintain partial computational results in memory, e.g., tree-based aggregation allows partial reuse.
 
@@ -72,7 +72,7 @@ Additionally, the cost of using semantic operators could be high. Operators use 
 - Leverage attention sparsity
   - For instance, a query like `papers_df.sem_topk("the {abstract} makes the most outrageous claim", K=10)` likely attends to names, numbers, or trigger phrases. Since each entry is reused frequently in `sem_topk`, exploiting sparsity can yield efficiency without harming accuracy.
 
-**Using UDF Operators**: Semantic-aware LLM-based operators model `DATA_SOURCE` as bags of data tuples (like relational operators). Other approaches extract structure as graphs, e.g., [GraphRAG](https://arxiv.org/pdf/2404.16130), [HippoRAG](https://arxiv.org/pdf/2502.14802).
+**Using UDF Operators**: Semantic-aware LLM-based operators model `DATA_SOURCE` as bags of data tuples (like relational operators). But not all continuous LLM tasks could be expressed as semantic operators, especially when the operator is executed on unstructured data source (e.g., like a long document) or the task requires extracting complex reasoning steps that cannot be expressed as semantic operators. One common approach is first extract the structure and relationships of the data explicitly by LLM first, and then performs inference on extracted structured data one request is received (e.g., [GraphRAG](https://arxiv.org/pdf/2404.16130), [HippoRAG](https://arxiv.org/pdf/2502.14802)).
 
 <img src="/images/blogs/HippoRAG.png" alt="hipporag" width="800"/>
 
@@ -83,6 +83,8 @@ Compared to black-box UDF LLMs, these approaches explicitly convert `DATA_SOURCE
 Thus, we can selectively update outputs when their input subgraphs change. Another insight from HippoRAG is that identifying key entities/relations is critical for accuracy.
 
 HippoRAG makes reasoning explicit via a knowledge graph. However, reasoning is increasingly handled implicitly by LLMs, so the retrieval (or broader "information extraction") is embedded in the inference process. This motivates studying how textual memory relates to parameterized memory.
+
+Incremental RAG () and incremental summarization ()
 
 ### Maintaining incremental LLM memory (Parameterized Memory)
 Assuming the LLM can retrieve/reason from both context and its trained memory, can it "update" results when `DATA_SOURCE` changes?
@@ -108,32 +110,32 @@ Three strategies to approach this:
 3. **Recompute sub-paragraphs** (middle ground)
 
 
-**Append delta as part of conversation**: For a model $LLM$, say we want to maintain a previously generated result $LLM(C)$ with initial context $C$. When the context is updated with $\Delta_{C}$, the most straightforward way to get an updated result is to call the model again with the new context and previously generated output as history:  
+<ins>Append delta as part of conversation</ins>: For a model $LLM$, say we want to maintain a previously generated result $LLM(C)$ with initial context $C$. When the context is updated with $\Delta_{C}$, the most straightforward way to get an updated result is to call the model again with the new context and previously generated output as history:  
 $LLM(C + LLM(C) + \Delta_{C})$
 
 As updates stream in, this forms a chronological log of deltas, naturally supporting versioning and time-travel. Some considerations:
 
-- <ins>*Scenarios where this approach applies*</ins>: This is generalizable to most use cases discussed in [earlier sections](#llm-as-incremental-data-processing-operator).
-- <ins>*Complexity of this approach*</ins>: This resembles multi-turn dialogue. While later updates may be short, accumulating full history increases context length, which impacts decoding time. Although KV sharing during prefill can reduce computation, its benefit diminishes as context grows.  
+- *Scenarios where this approach applies*: This is generalizable to most use cases discussed in [earlier sections](#llm-as-incremental-data-processing-operator).
+- *Complexity of this approach*: This resembles multi-turn dialogue. While later updates may be short, accumulating full history increases context length, which impacts decoding time. Although KV sharing during prefill can reduce computation, its benefit diminishes as context grows.  
   A potential optimization is **edit history compaction**—merge old edits into the original context and prune them from the conversation. To retain KV reuse after compaction, KV entries may need to be regenerated asynchronously (i.e., off the critical path).
 
-**Replace keywords if identifiable**: [Recent research](https://arxiv.org/pdf/2502.12067) shows that Chains-of-Thought can be compressed into key text tokens with little impact on accuracy. This suggests:
+<ins>Replace keywords if identifiable</ins>: [Recent research](https://arxiv.org/pdf/2502.12067) shows that Chains-of-Thought can be compressed into key text tokens with little impact on accuracy. This suggests:
 
 If we can identify the key information in context that is likely to change, and correlate it with the generated output, we can perform efficient updates.
 
 The examples below illustrate cases where key information in the input directly influences output, either as a fact or a reasoning bridge:
 
-- <ins>*Question*</ins>: What is the <mark>cause of death</mark> of the founder of Versus (Versace)?  
-  <ins>*Source*</ins>: "...Versus (Versace)... a gift by the founder Gianni Versace... Versace was <mark>shot</mark> and killed..."  
-  <ins>*Assistant*</ins>: "... <mark>shot</mark>..."
+- \[*Question*\]: What is the <mark>cause of death</mark> of the founder of Versus (Versace)?  
+  \[*Source*\]: "...Versus (Versace)... a gift by the founder Gianni Versace... Versace was <mark>shot</mark> and killed..."  
+  \[*Assistant*\]: "... <mark>shot</mark>..."
 
-- <ins>*Question*</ins>: Who is Dambar Shah’s <mark>grandchild</mark>?  
-  <ins>*Source*</ins>: "Doc1:... Dambar Shah ... He was the <mark>father of</mark> Krishna Shah. Doc2: Krishna Shah ... He was the <mark>father of</mark> Rudra Shah."  
-  <ins>*Assistant*</ins>: "... Rudra Shah ..."
+- \[*Question*\]: Who is Dambar Shah’s <mark>grandchild</mark>?  
+  \[*Source*\]: "Doc1:... Dambar Shah ... He was the <mark>father of</mark> Krishna Shah. Doc2: Krishna Shah ... He was the <mark>father of</mark> Rudra Shah."  
+  \[*Assistant*\]: "... Rudra Shah ..."
 
 This correlation can help determine whether to skip recomputation or invalidate outputs.
 
-**Find sub-paragraphs to recompute**: Building on earlier reasoning examples, attention scores might help uncover dependencies between context and output. Consider this example from the [glaiveai/RAG-v1](https://huggingface.co/datasets/glaiveai/RAG-v1) dataset:
+<ins>Find sub-paragraphs to recompute</ins>: Building on earlier reasoning examples, attention scores might help uncover dependencies between context and output. Consider this example from the [glaiveai/RAG-v1](https://huggingface.co/datasets/glaiveai/RAG-v1) dataset:
 
 The attention heatmap below shows alignment between generated sentences (Y-axis) and context sentences (X-axis). Blue/yellow boxes indicate where output closely follows input content. Columns with low attention were removed (green highlight), and the request was re-run.
 
@@ -177,13 +179,13 @@ Earlier, we discussed updates to `DATA_SOURCE`. What happens when `CONTEXT` (e.g
 
 The goal remains: **reuse past computation** whenever possible.
 
-1. **Reuse intermediate results**: Many prompts share overlapping sub-tasks.  
+1. <ins>Reuse intermediate results</ins>: Many prompts share overlapping sub-tasks.  
    Example:  
    - Prompt A: "Are directors of Film A and Film B from the same country?"  
    - Prompt B: "Who is older: the director of Film A or Film B?"  
    Both require identifying the directors first.
 
-2. **Compute incrementally over prior results**:  
+2. <ins>Compute incrementally over prior results</ins>:  
    Example:  
    - Prompt: "Plan my TODOs for project X today."  
      Might depend on:  
@@ -204,15 +206,15 @@ I tried changing the question to something unrelated to film director and it is 
 If we are able to make the analogy that updates to the stream of `CONTEXT` are constantly changing tasks/queries based on fixed pool of source data, and updates to the stream of `DATA_SOURCE` are constantly updating pool of source data where a single task is based on. My impression is that updates to `CONTEXT` is better explored than updates received at `DATA_SOURCE` based on (probably only a few out of many) papers I had impression on:
 The obvious question to ask here is that if we treat LLM as a data processing operator (which it is), then this problem would clearly overlap with some of the traditional problems in OLAP systems due to the possibilities of semantic reasoning of new tasks received at the stream of `CONTEXT`. To make the full analogy, these problems could include the [view selection problem](https://arxiv.org/pdf/2412.11828v1), the [view maintenance problem](https://arxiv.org/pdf/2203.16684), and the [query re-writing problem](https://dl.acm.org/doi/pdf/10.1145/376284.375706). Specifically, if we use QA as an example, on every question we received at the stream of `CONTEXT`:
 
-**Query Re-writing** requires question to be re-written to better match views generated in the past. 
+<ins>Query Re-writing</ins> requires question to be re-written to better match views generated in the past. 
 
-**View Selection** needs a searching mechanism to identify past questions that are semantically similar to the target question (e.g. [VectorQ](https://www.arxiv.org/pdf/2502.03771)). One question I kept wondering was that whether there is a good way to find a series of "base questions" that we predict will be useful to the questions we receive online -- Like the questions like "Which director is older" or "Are these directors are of the same nationality" can be both answered by the combining the answer of "Tell me about the director of film A" and "Tell me about the director of film B". How to decompose a question into a set of base views that we maintain, and then reason about the performance/cost of using these views are something I'd love to see. 
+<ins>View Selection</ins>  needs a searching mechanism to identify past questions that are semantically similar to the target question (e.g. [VectorQ](https://www.arxiv.org/pdf/2502.03771)). One question I kept wondering was that whether there is a good way to find a series of "base questions" that we predict will be useful to the questions we receive online -- Like the questions like "Which director is older" or "Are these directors are of the same nationality" can be both answered by the combining the answer of "Tell me about the director of film A" and "Tell me about the director of film B". How to decompose a question into a set of base views that we maintain, and then reason about the performance/cost of using these views are something I'd love to see. 
 
-**View Maintenance**: The partial results maintained by set of questions need to be constantly updated as new updates are received at the stream of `DATA_SOURCE`, which [has been discussed earlier](#updates-to-data_source). 
+<ins> View Maintenance</ins> The partial results maintained by set of questions need to be constantly updated as new updates are received at the stream of `DATA_SOURCE`, which [has been discussed earlier](#updates-to-data_source). 
 
 
 
-## Questions to ask
+## Thoughts and Questions
 
 **Tracking intra-context dependencies?**  
 If we can accurately identify dependency structures, how much can we save?
