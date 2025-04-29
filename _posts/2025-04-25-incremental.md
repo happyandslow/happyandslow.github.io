@@ -249,7 +249,7 @@ As reasoning becomes more common, we can assume that key information used during
 
 **View Maintenance over the Entire Workflow?**  
 
-So far the discussion on maintaining incremental memory is under the assumption of LLM as a single data processing operator. In practice, the operator could easily be as single step out of a complex multi-step job like workflow/multi-agent scenarios. The multi-step view management could create a problem space for rethinking programming framework along with resource aware optimizations. 
+So far the discussion on maintaining incremental memory is under the assumption of LLM as a single data processing operator. In practice, the operator could easily be as single step out of a complex multi-step job like workflow/multi-agent scenarios. The multi-step view management could create a problem space for rethinking programming framework along with resource aware optimizations. I haven't got the time to think deeper into this yet so I'm leaving it here as a space holder for now. 
 
 **Structured memory vs. implicit reasoning?**  
 
@@ -289,7 +289,7 @@ Most of the problems discussed in this post focus on dynamic parameterized memor
 
 Incremental processing (if done right) should reduce computation significantly, as [discussed previously](#maintaining-incremental-llm-memory-parameterized-memory):
 
-If we choose **Append delta as conversation** (<ins>best generalizability, least cost-effective</ins>), the updates are maintained as logs in the textual memory. The challenge then becomes *where* to maintain update history, as well as *how* and *when* to compact the update history to fit within the model's context window.
+If we choose *Append delta as conversation* (<ins>best generalizability, least cost-effective</ins>), the updates are maintained as logs in the textual memory. The challenge then becomes *where* to maintain update history, as well as *how* and *when* to compact the update history to fit within the model's context window.
 
 If we choose to **Recompute sub-paragraphs** (<ins>medium generalizability, medium cost-effectiveness</ins>), we should identify reusable tokens from past results. The generation process would mix decoding and prefilling requests—similar to constraint-decoding. This could fundamentally change engine design, which traditionally assumes LLM inference is a single round of prefill + decode.  
 Meanwhile, depending on KV cache reusability, this approach could result in frequent, token-level updates to stored KV on every update request, making the KV cache a more compute-intensive component.
@@ -299,7 +299,7 @@ The challenge here is that mappings between key words in source data and inferen
 
 Pre-establishing such mappings, along with other potential directions discussed earlier (e.g., [tracking dependency structures, query rewriting, view maintenance and selection](#updates-to-context)), can all be seen as attempts to **externalize LLM's thought process from fast to slow (but larger) storage**.  Many of these operations are not triggered by immediate requests and must happen off the inference critical path as part of background maintenance.  
 
-It is possible, I think, that the focus of building LLM serving stacks will start shifting—from purely optimizing inference tasks on **fast compute devices** (e.g., accelerators)—to **more collaborative, full-stack solutions that leverage slow compute** (i.e., near-storage) to enhance real-time inference, both in terms of performance and efficiency.
+It is possible, I think, that the focus of building LLM serving stacks will start shifting—from purely optimizing inference tasks on **fast compute devices** (e.g., accelerators)—to **more collaborative, full-stack solutions that leverage slow compute** (i.e., near-storage) to enhance real-time inference, both in terms of performance and efficiency. This shift is likely to emphasize areas such as memory optimization techniques, efficient dependency tracking mechanisms, hybrid compute architectures that balance fast and slow compute, and innovative caching strategies to maximize reuse of intermediate results.
   
 
 <!-- Future directions: indexing context, caching for reuse, long vs. short generation -->
