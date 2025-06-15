@@ -117,35 +117,31 @@ Talk
 
 Teaching
 ======
-**[05/2018, 05/2020]**: Teaching Assistant: Cloud Computing Capstone (Coursera)
-
-**[01/2015, 09/2019]**: Teaching Assistant: Distributed System (CS 425)
-
-**[01/2015, 01/2016]**: Teaching Assistant: Cloud Computing Concepts (Coursera) 
-
-**[01/2016]**: Teaching Assistant: Advanced Distributed Systems (CS 525) 
+* **[05/2018, 05/2020]**: Teaching Assistant: Cloud Computing Capstone (Coursera)
+* **[01/2015, 09/2019]**: Teaching Assistant: Distributed System (CS 425)
+* **[01/2015, 01/2016]**: Teaching Assistant: Cloud Computing Concepts (Coursera) 
+* **[01/2016]**: Teaching Assistant: Advanced Distributed Systems (CS 525) 
 
 
 Service and Leadership
 ======
-**[Program Committee]**: Middleware'23, NSDI'24, NSDI'26
-
-**[Reviews]**: ACM/IFIP/USENIX International Middleware Conference, USENIX Symposium on Networked Systems Design and Implementation (NSDI), ACM Proceedings of Very Large Data Base Endowment, IEEE Transactions on Computers (TC),  IEEE Transactions on Parallel and Distributed Systems (TPDS), IEEE International Symposium on Cluster, Cloud and Internet Computing (CCGrid), Transactions on Mobile Computing (TMC).
+* **[Program Committee]**: Middleware'23, NSDI'24, NSDI'26
+* **[Reviews]**: ACM/IFIP/USENIX International Middleware Conference, USENIX Symposium on Networked Systems Design and Implementation (NSDI), ACM Proceedings of Very Large Data Base Endowment, IEEE Transactions on Computers (TC),  IEEE Transactions on Parallel and Distributed Systems (TPDS), IEEE International Symposium on Cluster, Cloud and Internet Computing (CCGrid), Transactions on Mobile Computing (TMC).
 
 Honors, Memberships, Awards
 ======
-* 2021: 2021 CRA/CCC Computing Innovation Fellows
-* 2020: Rising Stars EECS Workshop
-* 2019: SOSP 19 Travel Grant
-* 2018: OSDI 18 Travel Grant
-* 2018: SoCC 18 Travel Grant
-* 2017: SOSP 17 Travel Grant
-* 2016: David J. Kuck Outstanding M.S. Thesis Award
-* 2015: Grace Hopper Celebration Travel Fund
-* 2015: Conference Travel Grant
-* 2015: Outstanding Teaching Assistant
-* 2011: Member of PI MU EPSILON: National Math Honor Society 
-* 2010: Edmund J James Scholar
+* **[2021]**: 2021 CRA/CCC Computing Innovation Fellows
+* **[2020]**: Rising Stars EECS Workshop
+* **[2019]**: SOSP 19 Travel Grant
+* **[2018]**: OSDI 18 Travel Grant
+* **[2018]**: SoCC 18 Travel Grant
+* **[2017]**: SOSP 17 Travel Grant
+* **[2016]**: David J. Kuck Outstanding M.S. Thesis Award
+* **[2015]**: Grace Hopper Celebration Travel Fund
+* **[2015]**: Conference Travel Grant
+* **[2015]**: Outstanding Teaching Assistant
+* **[2011]**: Member of PI MU EPSILON: National Math Honor Society 
+* **[2010]**: Edmund J James Scholar
 
 
 
