@@ -17,6 +17,7 @@ Don't hesitate to [contact me](mailto:le.xu@bytedance.com) if you're interested 
 
 Latest
 ======
+* **[6/2025]** We released AIBrix v0.3.0! [(Blog)](https://aibrix.github.io/posts/2025-05-21-v0.3.0-release/) 
 * **[3/2025]** We open-sourced [AIBrix](https://github.com/vllm-project/aibrix)! 
   * AIBrix is a production-ready cloud-native stack that provides essential building blocks to enable scalable LLM inference. It enables deploying, managing, and scaling LLM inference with one click, while also providing extensible APIs advancing research in LLM serving cloud infrastructure. Find more in our tech report [here](https://arxiv.org/pdf/2504.03648).
 
@@ -31,6 +32,7 @@ Education
 
 Publications and Preprints
 ======
+* **[Preprints]** Jiaxin Shan, Varun Gupta, Le Xu, Haiyang Shi, Jingyuan Zhang, Ning Wang, Linhui Xu, Rong Kang, Tongping Liu, Yifei Zhang, Yiqing Zhu, Shuowei Jin, Gangmuk Lim, Binbin Chen, Zuzhi Chen, Xiao Liu, Xin Chen, Kante Yin, Chak-Pong Chung, Chenyu Jiang, Yicheng Lu, Jianjun Chen, Caixue Lin, Wu Xiang, Rui Shi, Liguang Xie. “*<u>AIBrix: Towards Scalable, Cost-Effective Large Language Model Inference Infrastructure</u>*” [[arxiv]](https://arxiv.org/abs/2504.03648)
 * **[Preprints]** Bodun Hu, Jiamin Li, Le Xu, Myungjin Lee, Akshay Jajoo, Geon-Woo Kim, Hong Xu, Aditya Akella “*<u>BlockLLM: Multi-tenant finer-grained serving for large language models</u>*” [[arxiv]](https://arxiv.org/pdf/2404.18322)
   * A block-based LLM serving framework for fine-grained resource provisioning.
 * **[Preprints]** Le Xu, Divyanshu Saxena, Neeraja J. Yadwadkar, Aditya Akella and Indranil Gupta. “*<u>Dirigo: Self-scaling Stateful Actors For Serverless Real-time Data Processing.</u>*” [[arxiv]](https://arxiv.org/abs/2308.03615)
@@ -92,7 +94,27 @@ Industrial Experiences
   <ul>{% for post in site.talks reversed %}
     {% include archive-single-talk-cv.html  %}
   {% endfor %}</ul> -->
+
+Book Chapter
+======
+* **[2018]** Ghosh, Mainak, Le Xu, and Indranil Gupta. “*<u>Resource Management: Performance Assuredness in Distributed Cloud Computing via Online Reconfigurations.</u>*” Assured Cloud Computing (2018): 160-236. [[link]](https://onlinelibrary.wiley.com/doi/abs/10.1002/9781119428497.ch6)
+
+
+Patent
+======
+* **[2019]** Potharaju, Rahul, Kai Zeng, Paolo Costa, Terry Yumin Kim, Sudheer Dhulipalla, Saravanan Muthukrishnan, Shivaram Venkataraman, Le Xu, M. A. I. Lao, and Sriram Rao. “*<u>Dataflow execution graph modification using intermediate graph.</u>*” U.S. Patent Application 15/994,918, filed December 5, 2019. [[link]](https://patents.google.com/patent/US20190370408A1/en) 
   
+
+Talk
+======
+* **[2025]** "Introducing AIbrix: A Testbed for Large-Scale LLM Inference System Research", ASPLOS'25 Tutorial.
+* **[2022]** "Dirigo: Self-scaling Stateful Actors For Serverless Real-time Data Processing."  NITRD 30TH Anniversary Symposium, 2022.
+* **[2021]** "Move Fast and Meet Deadlines: Fine-grained Real-time Stream Processing with Cameo"  NSDI'21.
+* **[2016]** "Stela: Enabling Stream Processing Systems to Scale-in and Scale-out On-demand."  IC2E'16.
+
+
+
+
 Teaching
 ======
 **[05/2018, 05/2020]**: Teaching Assistant: Cloud Computing Capstone (Coursera)
@@ -104,11 +126,11 @@ Teaching
 **[01/2016]**: Teaching Assistant: Advanced Distributed Systems (CS 525) 
 
 
-Service and leadership
+Service and Leadership
 ======
-**[Program Committee]**: 2024 USENIX Symposium on Networked Systems Design and Implementation (NSDI 24')
+**[Program Committee]**: Middleware'23, NSDI'24, NSDI'26
 
-**[Program Committee]**: 2023 ACM/IFIP/USENIX International Middleware Conference (Middleware 23') 
+**[Reviews]**: ACM/IFIP/USENIX International Middleware Conference, USENIX Symposium on Networked Systems Design and Implementation (NSDI), ACM Proceedings of Very Large Data Base Endowment, IEEE Transactions on Computers (TC),  IEEE Transactions on Parallel and Distributed Systems (TPDS), IEEE International Symposium on Cluster, Cloud and Internet Computing (CCGrid), Transactions on Mobile Computing (TMC).
 
 Honors, Memberships, Awards
 ======
@@ -124,6 +146,8 @@ Honors, Memberships, Awards
 * 2015: Outstanding Teaching Assistant
 * 2011: Member of PI MU EPSILON: National Math Honor Society 
 * 2010: Edmund J James Scholar
+
+
 
 Cloud-Free Zone
 ======
