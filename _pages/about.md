@@ -32,13 +32,16 @@ Education
   * Advised by Indranil Gupta.
 * **[05/2013]** B.S. in Math and Computer Science, University of Illinois at Urbana Champaign
 
-Publications and Preprints
+Preprints
 ======
 * **[Preprints]** Jiaxin Shan, Varun Gupta, Le Xu, Haiyang Shi, Jingyuan Zhang, Ning Wang, Linhui Xu, Rong Kang, Tongping Liu, Yifei Zhang, Yiqing Zhu, Shuowei Jin, Gangmuk Lim, Binbin Chen, Zuzhi Chen, Xiao Liu, Xin Chen, Kante Yin, Chak-Pong Chung, Chenyu Jiang, Yicheng Lu, Jianjun Chen, Caixue Lin, Wu Xiang, Rui Shi, Liguang Xie. “*<u>AIBrix: Towards Scalable, Cost-Effective Large Language Model Inference Infrastructure</u>*” [[arxiv]](https://arxiv.org/abs/2504.03648)
 * **[Preprints]** Bodun Hu, Jiamin Li, Le Xu, Myungjin Lee, Akshay Jajoo, Geon-Woo Kim, Hong Xu, Aditya Akella “*<u>BlockLLM: Multi-tenant finer-grained serving for large language models</u>*” [[arxiv]](https://arxiv.org/pdf/2404.18322)
   * A block-based LLM serving framework for fine-grained resource provisioning.
 * **[Preprints]** Le Xu, Divyanshu Saxena, Neeraja J. Yadwadkar, Aditya Akella and Indranil Gupta. “*<u>Dirigo: Self-scaling Stateful Actors For Serverless Real-time Data Processing.</u>*” [[arxiv]](https://arxiv.org/abs/2308.03615)
   * A virtual actor model that helps stream processing applications to scale freely at fine granularity.
+  
+Publications
+======
 * **[ACL 25]** Bodun Hu, Shuozhe Li, Saurabh Agarwal, Myungjin Lee, Akshay Jajoo, Jiamin Li, Le Xu, Geon-Woo Kim,Donghyun Kim, Hong Xu, Amy Zhang, Aditya Akella. “*<u>StitchLLM: Serving LLMs, One Block at a Time</u>*” [[link]](https://openreview.net/forum?id=4GPLdf7wBO)
   * Fine-grained layer stitching for resource-efficient LLM serving.
 * **[GPGPU 25]** Daoxuan Xu, Le Xu, Jie Ren, Yifan Sun. “*<u>Exploring the Wafer-Scale GPU</u>*” [[link]](files/wafer_scale_gpu_gpgpu.pdf)
