@@ -34,6 +34,8 @@ Education
 
 Preprints
 ======
+* **[Preprints]** Zhu, Kan, Haiyang Shi, Le Xu, Jiaxin Shan, Arvind Krishnamurthy, Baris Kasikci, and Liguang Xie. “*<u>PolyServe: Efficient Multi-SLO Serving at Scale</u>*” [[arxiv]](https://arxiv.org/abs/2507.17769)
+  * Multi-SLO attainment with high resource utilization through advanced requests binning. 
 * **[Preprints]** Jiaxin Shan, Varun Gupta, Le Xu, Haiyang Shi, Jingyuan Zhang, Ning Wang, Linhui Xu, Rong Kang, Tongping Liu, Yifei Zhang, Yiqing Zhu, Shuowei Jin, Gangmuk Lim, Binbin Chen, Zuzhi Chen, Xiao Liu, Xin Chen, Kante Yin, Chak-Pong Chung, Chenyu Jiang, Yicheng Lu, Jianjun Chen, Caixue Lin, Wu Xiang, Rui Shi, Liguang Xie. “*<u>AIBrix: Towards Scalable, Cost-Effective Large Language Model Inference Infrastructure</u>*” [[arxiv]](https://arxiv.org/abs/2504.03648)
 * **[Preprints]** Bodun Hu, Jiamin Li, Le Xu, Myungjin Lee, Akshay Jajoo, Geon-Woo Kim, Hong Xu, Aditya Akella “*<u>BlockLLM: Multi-tenant finer-grained serving for large language models</u>*” [[arxiv]](https://arxiv.org/pdf/2404.18322)
   * A block-based LLM serving framework for fine-grained resource provisioning.
