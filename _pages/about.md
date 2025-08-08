@@ -19,7 +19,7 @@ Don't hesitate to [contact me](mailto:le.xu@bytedance.com) if you're interested 
 
 Latest
 ======
-* **[6/2025]** We released AIBrix v0.3.0! [(Blog)](https://aibrix.github.io/posts/2025-05-21-v0.3.0-release/) 
+* **[8/2025]** We released AIBrix v0.4.0! [(Blog)](https://aibrix.github.io/posts/2025-08-04-v0.4.0-release/) 
 * **[3/2025]** We open-sourced [AIBrix](https://github.com/vllm-project/aibrix)! 
   * AIBrix is a production-ready cloud-native stack that provides essential building blocks to enable scalable LLM inference. It enables deploying, managing, and scaling LLM inference with one click, while also providing extensible APIs advancing research in LLM serving cloud infrastructure. Find more in our tech report [here](https://arxiv.org/pdf/2504.03648).
 
