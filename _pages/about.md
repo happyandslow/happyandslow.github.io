@@ -7,9 +7,13 @@ redirect_from:
   - /about.html
 ---
 
-I'm currently a researcher/software engineer at Computing Infrastructure Lab of Bytedance Inc. My current work focuses on building next-generation AI serving infrastructures. Previously I was a Postdoc Researcher of Computer Science at UT Austin, working with [Prof. Aditya Akella](http://pages.cs.wisc.edu/~akella/) at UT Networked Systems group ([UTNS](https://utns.cs.utexas.edu/)). I was one of the recipients of [CIFellow 2021](https://cifellows2021.org/2021-class/), supported by both National Science Foundation (NSF) and Computing Research Association (CRA). During my PhD I worked on making real time data processing systems more elastic, under the supervision of [Prof. Indranil Gupta](http://indy.cs.illinois.edu/) at Distributed Protocols Research Group ([DPRG](http://dprg.cs.uiuc.edu/)). My current research mainly revolves around all aspects of resource-efficiencies in computer systems. 
+I'm currently a research associate at the University of Edinburgh, working with [Prof. Luo Mai](https://luomai.github.io/). My ongoing projects explore the intersections of AI models and applications with emerging AI accelerators.
 
-Don't hesitate to [contact me](mailto:contact@lexu.space) if you're interested in my experience or would like to chat about my recent research! I'm always open to opportunities for collboration and/or full-time research positions. See my [CV](files/lexu_cv.pdf) and list of [publications](https://scholar.google.com/citations?user=uFyE-AQAAAAJ) here.
+Previously, I spent 1.5 years at Bytedance initiating the [AIBrix](https://github.com/vllm-project/aibrix) project. Before my industry time, I was a Postdoc Researcher of Computer Science at UT Austin, working with [Prof. Aditya Akella](http://pages.cs.wisc.edu/~akella/) at UT Networked Systems group ([UTNS](https://utns.cs.utexas.edu/)). I was one of the recipients of [CIFellow 2021](https://cifellows2021.org/2021-class/), supported by both the National Science Foundation (NSF) and Computing Research Association (CRA). 
+
+During my PhD, I worked on making real-time data processing systems more elastic, under the supervision of [Prof. Indranil Gupta](http://indy.cs.illinois.edu/) at Distributed Protocols Research Group ([DPRG](http://dprg.cs.uiuc.edu/)). My current research mainly revolves around all aspects of resource-efficiency in computer systems.
+
+Don't hesitate to [contact me](mailto:le.xu@ed.ac.uk) if you're interested in my experience or would like to chat about my recent research! I'm always open to opportunities for collaboration and/or full-time research positions. See my [CV](files/lexu_cv.pdf) and list of [publications](https://scholar.google.com/citations?user=uFyE-AQAAAAJ) here.
 
 
 ------------------------------
@@ -19,6 +23,7 @@ Don't hesitate to [contact me](mailto:contact@lexu.space) if you're interested i
 
 Latest
 ======
+* **[10/2025]** I just joined University of Edinburgh! My next agenda is to build efficient runtime software stack for emerging AI hardware. 
 * **[8/2025]** We released AIBrix v0.4.0! [(Blog)](https://aibrix.github.io/posts/2025-08-04-v0.4.0-release/) 
 * **[3/2025]** We open-sourced [AIBrix](https://github.com/vllm-project/aibrix)! 
   * AIBrix is a production-ready cloud-native stack that provides essential building blocks to enable scalable LLM inference. It enables deploying, managing, and scaling LLM inference with one click, while also providing extensible APIs advancing research in LLM serving cloud infrastructure. Find more in our tech report [here](https://arxiv.org/pdf/2504.03648).
