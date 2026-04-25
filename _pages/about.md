@@ -46,6 +46,7 @@ Preprints
   
 Publications
 ======
+* **[OSDI 26]** Tairan Xu*, Leyang Xue*, Zhan Lu*, Jinfu Deng, Hongyang Xiao, Yinsicheng Jiang, Congjie He, Matej Sandor, Le Xu, Luo Mai. “*<u>BatchGen: An Architecture for Scalable and Efficient Batch Inference</u>*” [[To Appear]]. 
 * **[ACL 25]** Bodun Hu, Shuozhe Li, Saurabh Agarwal, Myungjin Lee, Akshay Jajoo, Jiamin Li, Le Xu, Geon-Woo Kim,Donghyun Kim, Hong Xu, Amy Zhang, Aditya Akella. “*<u>StitchLLM: Serving LLMs, One Block at a Time</u>*” [[link]](https://openreview.net/forum?id=4GPLdf7wBO)
   * Fine-grained layer stitching for resource-efficient LLM serving.
 * **[GPGPU 25]** Daoxuan Xu, Le Xu, Jie Ren, Yifan Sun. “*<u>Exploring the Wafer-Scale GPU</u>*” [[link]](files/wafer_scale_gpu_gpgpu.pdf)
